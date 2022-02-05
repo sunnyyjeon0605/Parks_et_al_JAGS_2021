@@ -1,0 +1,157 @@
+---
+title: "figure 1"
+author: "Sun Jeon"
+date: "June 3, 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+## Load the libraries we will be using
+install.packages("tidyverse")
+install.packages("ggthemes")
+install.packages("haven")
+library(tidyverse)
+library(ggthemes)   
+library(haven)
+
+#####  Color Palette by Paletton.com 30degrees
+#####  Palette URL: http://paletton.com/#uid=7070u0ksyu7hHCkmJvyuMo9zZj4
+
+## FIGURE SETTINGS
+sachin_theme_leg <- theme_bw()+
+        theme(
+          panel.background = element_blank(), 
+          axis.line = element_line(colour = "grey75"),
+          panel.border = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line(color = "grey", linetype = "dotted" ),
+          panel.grid.minor.y = element_blank(),
+          legend.position = "top", 
+          legend.title = element_blank(),
+          axis.title=element_text(size=10),
+          plot.caption = element_text(hjust = 0, face= "italic"), #Default is hjust=1
+          plot.title.position = "plot", #NEW parameter. Apply for subtitle too.
+          plot.caption.position =  "plot" #NEW parameter
+          )
+         
+
+install.packages("readx1")
+library(readxl)
+
+```
+
+## ADL
+
+
+```{r adl}
+
+install.packages("grid")
+install.packages("gridExtra")
+
+library(grid)
+library(gridExtra)
+
+gridpredict <- read_excel("C:/Users/sjeon/Desktop/work/anna_parks_07022021/adl_bleed_v2.xlsx")
+gridpredict$mean_adl[gridpredict$yr<5.2] = jitter(gridpredict$mean_adl[gridpredict$yr<5.2], factor=12)
+gridpredict$adl_lb[gridpredict$yr<5.2] = jitter(gridpredict$adl_lb[gridpredict$yr<5.2], factor=10)
+gridpredict$adl_ub[gridpredict$yr<5.2] = jitter(gridpredict$adl_ub[gridpredict$yr<5.2], factor=10)
+gridpredict$Bleed <- factor(gridpredict$Bleed, levels = c("Population with no ECHs", "Population where all have an ECH at 5.2 yrs"))
+color_sig <- c( "#F03B1A", "#157696")
+
+fig1.adl <- ggplot(data = gridpredict, mapping = aes(x = yr, y = mean_adl, group=Bleed, color=Bleed))+
+            geom_line(size=1)+
+            geom_ribbon(aes(ymin=adl_lb, ymax=adl_ub, fill=Bleed), alpha =0.2, color=NA) +
+  
+            scale_x_continuous(name = "Time in cohort (years)", limits = c(0,12), breaks = c(seq(from = 0, to =12, by = 1))) + 
+            scale_y_continuous(name = "Population likelihood of ADL independence", 
+                          labels = scales::percent_format(accuracy = 1), limits = c(0,1), breaks = c(seq(from = 0, to =1, by = .10))) +
+            sachin_theme_leg  +
+
+
+            scale_color_manual(values=c("#00BFC4", "#F8766D"))+
+            scale_fill_manual(values=c("#00BFC4", "#F8766D"))
+
+
+            #+labs(x=NULL,
+           # title = "Figure: Longitudinal likelihood of ADL independence and \n association with extracranial hemorrhage")
+            #subtitle = "(A) ADL independence") 
+
+fig1.adl
+ggsave("C:/Users/sjeon/Desktop/work/anna_parks_07022021/bleed_adl_08122021.png", width = 6, height = 5)
+
+
+
+```
+
+
+```{r iadl}
+gridpredict <- read_excel("C:/Users/sjeon/Desktop/work/anna_parks_07022021/iadl_bleed_v2.xlsx")
+
+gridpredict$mean_iadl[gridpredict$yr<5.2] = jitter(gridpredict$mean_iadl[gridpredict$yr<5.2], factor=12)
+gridpredict$iadl_lb[gridpredict$yr<5.2] = jitter(gridpredict$iadl_lb[gridpredict$yr<5.2], factor=10)
+gridpredict$iadl_ub[gridpredict$yr<5.2] = jitter(gridpredict$iadl_ub[gridpredict$yr<5.2], factor=10)
+gridpredict$Bleed <- factor(gridpredict$Bleed, levels = c("Population with no ECHs", "Population where all have an ECH at 5.2 yrs"))
+
+
+## ADL
+fig2.iadl <- ggplot(data = gridpredict, mapping = aes(x = yr, y = mean_iadl, group=Bleed, color=Bleed))+
+            geom_line(size=1)+
+            geom_ribbon(aes(ymin=iadl_lb, ymax=iadl_ub, fill=Bleed), alpha =0.2, color=NA) +
+  
+            scale_x_continuous(name = "Time in cohort (years)", limits = c(0,12), breaks = c(seq(from = 0, to =12, by = 1))) + 
+            scale_y_continuous(name = "Population likelihood of IADL independence", 
+                          labels = scales::percent_format(accuracy = 1), limits = c(0,1), breaks = c(seq(from = 0, to =1, by = .10))) +
+            sachin_theme_leg  +
+
+            scale_color_manual(values=c("#00BFC4", "#F8766D"))+
+            scale_fill_manual(values=c("#00BFC4", "#F8766D"))
+  
+            #+labs(x=NULL,
+           # title = "Figure: Longitudinal likelihood of ADL independence and \n association with extracranial hemorrhage")
+            #subtitle = "(A) ADL independence") 
+
+fig2.iadl
+ggsave("C:/Users/sjeon/Desktop/work/anna_parks_07022021/bleed_iadl_0812021.png", width = 6, height = 5)
+
+
+
+```
+
+```{r nh}
+gridpredict <- read_excel("C:/Users/sjeon/Desktop/work/anna_parks_07022021/nh_bleed_v2.xlsx")
+
+gridpredict$mean_nh[gridpredict$yr<5.2] = jitter(gridpredict$mean_nh[gridpredict$yr<5.2], factor=12)
+gridpredict$nh_lb[gridpredict$yr<5.2] = jitter(gridpredict$nh_lb[gridpredict$yr<5.2], factor=10)
+gridpredict$nh_ub[gridpredict$yr<5.2] = jitter(gridpredict$nh_ub[gridpredict$yr<5.2], factor=10)
+gridpredict$Bleed <- factor(gridpredict$Bleed, levels = c("Population with no ECHs", "Population where all have an ECH at 5.2 yrs"))
+
+
+## ADL
+fig3.nh <-  ggplot(data = gridpredict, mapping = aes(x = yr, y = 1-mean_nh, group=Bleed, color=Bleed))+
+            geom_line(size=1)+
+            geom_ribbon(aes(ymin=1-nh_lb, ymax=1-nh_ub, fill=Bleed), alpha =0.2, color=NA) +
+  
+            scale_x_continuous(name = "Time in cohort (years)", limits = c(0,12), breaks = c(seq(from = 0, to =12, by = 1))) + 
+            scale_y_continuous(name = "Population likelihood of extended nursing home stay", 
+                          labels = scales::percent_format(accuracy = 1), limits = c(0,1), breaks = c(seq(from = 0, to =1, by = .10))) +
+            sachin_theme_leg  +
+
+
+            scale_color_manual(values=c("#00BFC4", "#F8766D"))+
+            scale_fill_manual(values=c("#00BFC4", "#F8766D"))
+            #+labs(x=NULL,
+           # title = "Figure: Longitudinal likelihood of ADL independence and \n association with extracranial hemorrhage")
+            #subtitle = "(A) ADL independence") 
+
+fig3.nh
+ggsave("C:/Users/sjeon/Desktop/work/anna_parks_07022021/bleed_nh_11022021.png", width = 6, height = 5)
+
+```
+
